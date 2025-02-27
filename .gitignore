@@ -1,6 +1,8 @@
 .*/
 .*.backup
 
+app-go/
+
 # Logs
 logs
 *.log
