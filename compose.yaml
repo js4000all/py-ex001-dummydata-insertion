@@ -1,0 +1,91 @@
+services:
+  # influxdb:
+  #   image: influxdb:2.7
+  #   restart: always
+  #   ports:
+  #     - "8086:8086"
+  #   volumes:
+  #     - influxdb-data:/var/lib/influxdb2
+  #     - ./influxdb-config:/etc/influxdb2
+  #   environment:
+  #     - INFLUXDB_DB=mydb
+  #     - INFLUXDB_ADMIN_USER=admin
+  #     - INFLUXDB_ADMIN_PASSWORD=tspass
+  #     - INFLUXDB_ADMIN_TOKEN=admintoken
+
+  mariadb:
+    image: mariadb
+    restart: always
+    # ports:
+    #   - "3306:3306"
+    volumes:
+      - mariadb-data:/var/lib/mysql
+      - "./social_media.sql:/docker-entrypoint-initdb.d/1.sql"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rdbroot
+      - MYSQL_DATABASE=mydb
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=rdbpass
+
+  grafana:
+    image: grafana/grafana
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-etc:/etc/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=grapass
+    depends_on:
+      # - influxdb
+      - mariadb
+    
+  # nodered:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.red
+  #   ports:
+  #     - "1880:1880" # Node-REDのデフォルトポートを公開
+  #   volumes:
+  #     - ./nodered-data:/data # データ永続化のためのボリューム
+  #   environment:
+  #     - TZ=Asia/Tokyo # タイムゾーンを設定
+  #   restart: unless-stopped # コンテナが停止したときに再起動
+
+  mail:
+    image: axllent/mailpit
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+    environment:
+      - MP_DATA_FILE=/data/mailpit.db # メールの内容をディスクに保存する場合のパス指定
+    volumes:
+      - mailpit-data:/data
+
+  py:
+    build: 
+      context: .
+      dockerfile: Dockerfile.py
+    ports:
+      - "58888:8888"
+    environment:
+      - JUPYTER_ENABLE_LAB=yes
+    volumes:
+      - ./app:/usr/src/app
+    command: jupyter lab --ip=0.0.0.0 --no-browser --NotebookApp.token='' --NotebookApp.port=8888 --notebook-dir=/usr/src/app
+
+  go:
+    image: golang:alpine
+    volumes:
+      - ./app-go:/go/src
+    command: go run src/app.go
+    profiles:
+      - dev
+
+volumes:
+  influxdb-data:
+  mariadb-data:
+  grafana-data:
+  mailpit-data:
