@@ -1,0 +1,652 @@
+[
+    {
+        "id": "75e35e5dbd3a75df",
+        "type": "tab",
+        "label": "フロー 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "5a24e269164612c2",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#4B7930",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": false
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": false
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": false
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": false
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": false
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": false
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED ダッシュボード",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "YYYY/MM/DD",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "5104ad85316d70df",
+        "type": "ui_tab",
+        "name": "監視",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "254fb6b14b77a328",
+        "type": "ui_group",
+        "name": "温度",
+        "tab": "5104ad85316d70df",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "924280f31bad1338",
+        "type": "MySQLdatabase",
+        "name": "sensor",
+        "host": "mariadb",
+        "port": "3306",
+        "db": "mydb",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "0bd14a5326179bbb",
+        "type": "ui_group",
+        "name": "流量",
+        "tab": "5104ad85316d70df",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "b03162ba78e6b00a",
+        "type": "ui_tab",
+        "name": "帳票",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "2a3f1777409151db",
+        "type": "ui_group",
+        "name": "日報",
+        "tab": "b03162ba78e6b00a",
+        "order": 1,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "61b69dc29581d6a9",
+        "type": "ui_group",
+        "name": "月報",
+        "tab": "b03162ba78e6b00a",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "4c577c7f13fce93e",
+        "type": "inject",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 140,
+        "y": 80,
+        "wires": [
+            [
+                "077bc66c4fcc1c46"
+            ]
+        ]
+    },
+    {
+        "id": "0f4a9e9fd4c41d49",
+        "type": "debug",
+        "z": "75e35e5dbd3a75df",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "077bc66c4fcc1c46",
+        "type": "function",
+        "z": "75e35e5dbd3a75df",
+        "name": "SQL作成",
+        "func": "msg.topic=\"select UNIX_TIMESTAMP(measurement_time) as time, sensor_id, value from measurements order by measurement_time desc limit 100\";\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 320,
+        "y": 80,
+        "wires": [
+            [
+                "f424dfd286edc04e"
+            ]
+        ]
+    },
+    {
+        "id": "f424dfd286edc04e",
+        "type": "mysql",
+        "z": "75e35e5dbd3a75df",
+        "mydb": "924280f31bad1338",
+        "name": "query",
+        "x": 470,
+        "y": 80,
+        "wires": [
+            [
+                "86dd151dc9e9fe72",
+                "3ba1fc1018487be5"
+            ]
+        ]
+    },
+    {
+        "id": "63792830b0b0dbc0",
+        "type": "function",
+        "z": "75e35e5dbd3a75df",
+        "name": "function 2",
+        "func": "msg.payload = [\n    [\"aaa\", \"bbb\"],\n    [1,2],\n    [3,4]\n];\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 360,
+        "wires": [
+            [
+                "0f4a9e9fd4c41d49",
+                "5bc6f9be54b07da6"
+            ]
+        ]
+    },
+    {
+        "id": "1751ed047beac895",
+        "type": "http response",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 710,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "1b9c180ccf5d076c",
+        "type": "http in",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "url": "/api/csv",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 110,
+        "y": 300,
+        "wires": [
+            [
+                "63792830b0b0dbc0"
+            ]
+        ]
+    },
+    {
+        "id": "2e2a3a20622746ce",
+        "type": "ui_template",
+        "z": "75e35e5dbd3a75df",
+        "group": "254fb6b14b77a328",
+        "name": "",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "format": "<div>\n\n    <a href=\"/api/csv\">CSV</a>\n</div>\n",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 100,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5bc6f9be54b07da6",
+        "type": "csv",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "spec": "rfc",
+        "sep": ",",
+        "hdrin": "",
+        "hdrout": "none",
+        "multi": "one",
+        "ret": "\\r\\n",
+        "temp": "",
+        "skip": "0",
+        "strings": true,
+        "include_empty_strings": "",
+        "include_null_values": "",
+        "x": 330,
+        "y": 400,
+        "wires": [
+            [
+                "df2e57cc0447ffd9",
+                "0f4a9e9fd4c41d49"
+            ]
+        ]
+    },
+    {
+        "id": "df2e57cc0447ffd9",
+        "type": "change",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "headers",
+                "pt": "msg",
+                "to": "{\"Content-Type\":\"text/csv\",\"Content-Disposition\":\"attachment; filename=\\\"example.csv\\\"\"}",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 530,
+        "y": 400,
+        "wires": [
+            [
+                "1751ed047beac895"
+            ]
+        ]
+    },
+    {
+        "id": "798822c172c7ed8c",
+        "type": "ui_chart",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "group": "254fb6b14b77a328",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "label": "chart",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "YY.MM.DD HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 790,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "86dd151dc9e9fe72",
+        "type": "db2chart",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "firstcol": true,
+        "x": 620,
+        "y": 80,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "649507e612009d75",
+        "type": "ui_text",
+        "z": "75e35e5dbd3a75df",
+        "group": "2a3f1777409151db",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "消費電力",
+        "format": "{{msg.a}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 400,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "e711ccae16a09203",
+        "type": "ui_text",
+        "z": "75e35e5dbd3a75df",
+        "group": "2a3f1777409151db",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "最高温度",
+        "format": "{{msg.b}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 400,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "6b77bd6fcb110937",
+        "type": "ui_text",
+        "z": "75e35e5dbd3a75df",
+        "group": "2a3f1777409151db",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "平均流量",
+        "format": "{{msg.c}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 400,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "a85791439edde649",
+        "type": "inject",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 120,
+        "y": 500,
+        "wires": [
+            [
+                "8771a3e2329ea92a"
+            ]
+        ]
+    },
+    {
+        "id": "8771a3e2329ea92a",
+        "type": "change",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "a",
+                "pt": "msg",
+                "to": "12",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "b",
+                "pt": "msg",
+                "to": "28.5",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "c",
+                "pt": "msg",
+                "to": "0.18",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 220,
+        "y": 540,
+        "wires": [
+            [
+                "649507e612009d75",
+                "e711ccae16a09203",
+                "6b77bd6fcb110937"
+            ]
+        ]
+    },
+    {
+        "id": "b325edb1ae2a85df",
+        "type": "function",
+        "z": "75e35e5dbd3a75df",
+        "name": "recs2chart",
+        "func": "const b = 20;\nconst a = -10;\nmsg = {\n    topic: \"temperature\",\n    payload: Math.floor(Math.random() * (b - a + 1)) + a,\n    timestamp: Date.now()\n}\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "3ba1fc1018487be5",
+        "type": "split",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "property": "payload",
+        "x": 430,
+        "y": 160,
+        "wires": [
+            [
+                "0f4a9e9fd4c41d49",
+                "662606f7cee5a2ba"
+            ]
+        ]
+    },
+    {
+        "id": "662606f7cee5a2ba",
+        "type": "change",
+        "z": "75e35e5dbd3a75df",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.value",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "payload.sensor_id",
+                "tot": "msg"
+            },
+            {
+                "t": "set",
+                "p": "timestamp",
+                "pt": "msg",
+                "to": "payload.time",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 200,
+        "wires": [
+            [
+                "798822c172c7ed8c"
+            ]
+        ]
+    }
+]

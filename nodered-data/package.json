@@ -1,0 +1,11 @@
+{
+    "name": "node-red-project",
+    "description": "A Node-RED Project",
+    "version": "0.0.1",
+    "private": true,
+    "dependencies": {
+        "@pgspider/node-red-db2chart": "~1.0.0",
+        "node-red-contrib-aedes": "~0.13.0",
+        "node-red-node-mysql-dynamic": "~2.0.0"
+    }
+}
