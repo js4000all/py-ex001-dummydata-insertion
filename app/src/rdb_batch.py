@@ -104,7 +104,7 @@ def split_and_flatten_batches(
 def create_insert_batch(
         sql: str, 
         times: ty.Iterator[dt.datetime],
-        params_iters: ty.Iterator[ty.Iterator[ty.Any]]
+        params_iters: list[ty.Iterator[ty.Any]]
         ) -> InsertBatch:
     """
     指定された条件でInsertBatchを生成する。
@@ -118,16 +118,27 @@ def create_insert_batch(
 
 def create_insert_params(
         times: ty.Iterator[dt.datetime],
-        params_iters: ty.Iterator[ty.Iterator[ty.Any]]
+        params_iters: list[ty.Iterator[ty.Any]]
         ) -> ty.Iterator[InsertParams]:
     """
     指定された条件でInsertParamsを生成するジェネレータを生成する。
     
-    :param sql: SQL文
     :param times: 時刻のイテレータ
     :param params_iters: パラメータのイテレータのリスト
-    :param steps: ステップ数
     :return: InsertParamsのイテレータ
+
+    例:
+    ```
+    times = [t1, t2, t3, t4]
+    params_iters = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+    create_insert_params(times, params_iters) -> [
+        InsertParams(t1, 1, 5, 9),
+        InsertParams(t2, 2, 6, 10),
+        InsertParams(t3, 3, 7, 11),
+        InsertParams(t4, 4, 8, 12)
+    ]
+    ```
     """
-    while True:
-        yield InsertParams(next(times), [iter(next(p_iter)) for p_iter in params_iters])
+    for time, *params in it.zip_longest(times, *params_iters):
+        yield InsertParams(time, params)
+        

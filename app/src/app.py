@@ -84,7 +84,7 @@ def _create_recs(
 
     sql_params = ['%s' for _ in range(len(sql_cols))]
     sql = f"INSERT INTO {target_table}({', '.join(sql_cols)}) VALUES({', '.join(sql_params)})"
-    return rb.create_insert_batch(sql, times, iter(params_iters))
+    return rb.create_insert_batch(sql, times, params_iters)
 
 def insert(batches: list[rb.InsertBatch], steps_after: int) -> None:
     inserter = lambda sql, params: rdb.execute_update(sql, params, time_converter=lambda x: x.timestamp())
