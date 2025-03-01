@@ -64,16 +64,39 @@ def flatten_insert_batches(batches: list[InsertBatch]) -> ty.Iterator[InsertTask
 
     :param batches: InsertBatchのリスト
     :return: Iterator[InsertTask]
+
+    例:
+    ```
+    batches = [
+        InsertBatch("sql1", iter([
+            InsertParams(t1, [1]),
+            InsertParams(t2, [2]),
+            InsertParams(t3, [3]),
+            InsertParams(t4, [4]),
+            ])),
+        InsertBatch("sql2", iter([
+            InsertParams(t5, [5]),
+            InsertParams(t6, [6])
+            ]))
+    ]
+    flatten_insert_batches(batches) -> [
+        InsertTask("sql1", InsertParams(t1, [1])),
+        InsertTask("sql2", InsertParams(t6, [6])),
+        InsertTask("sql1", InsertParams(t2, [2])),
+        InsertTask("sql2", InsertParams(t5, [5])),
+        InsertTask("sql1", InsertParams(t3, [3])),
+        InsertTask("sql1", InsertParams(t4, [4]))
+    ]
     """
-    # 各バッチのパラメータイテレータを取得
-    param_iters = [batch.params_iter for batch in batches]
+    insert_tasks_list: list[ty.Iterator[InsertTask]] = [_to_task(batch) for batch in batches]
+    for insert_tasks in it.zip_longest(*insert_tasks_list):
+        for insert_task in insert_tasks:
+            if insert_task is not None:
+                yield insert_task
 
-    # パラメータを順次取得し、それに対応するSQLと組み合わせて生成
-    for params in it.zip_longest(*param_iters):
-        for batch, param in zip(batches, params):
-            if param is not None:
-                yield InsertTask(batch.sql, param)
-
+def _to_task(batch: InsertBatch) -> ty.Iterator[InsertTask]:
+    for p in batch.params_iter:
+        yield InsertTask(batch.sql, p)
 
 def split_and_flatten_batches(
         split_time: dt.datetime, batches: list[InsertBatch]

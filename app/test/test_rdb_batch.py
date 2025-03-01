@@ -1,4 +1,6 @@
 import datetime as dt
+import typing as ty
+
 import rdb_batch as rb
 
 def _sec(seconds: int) -> dt.datetime:
@@ -39,3 +41,34 @@ def test_split_insert_batch():
         rb.InsertParams(_sec(1), [2, 5]), 
         rb.InsertParams(_sec(2), [3, 6])
         ]
+
+def test_flatten_insert_batches():
+    sql1 = "sql1"
+    sql2 = "sql2"
+    batches = [
+        rb.InsertBatch(
+            sql1, 
+            iter([
+                rb.InsertParams(_sec(0), [1]),
+                rb.InsertParams(_sec(3), [2]),
+                rb.InsertParams(_sec(6), [3]),
+                rb.InsertParams(_sec(9), [4])
+            ])
+        ),
+        rb.InsertBatch(
+            sql2, 
+            iter([
+                rb.InsertParams(_sec(1), [11]),
+                rb.InsertParams(_sec(2), [12])
+            ])
+        )
+    ]
+    flattened: ty.Iterator[InsertTask] = rb.flatten_insert_batches(batches)
+    assert list(flattened) == [
+        rb.InsertTask(sql1, rb.InsertParams(_sec(0), [1])),
+        rb.InsertTask(sql2, rb.InsertParams(_sec(1), [11])),
+        rb.InsertTask(sql1, rb.InsertParams(_sec(3), [2])),
+        rb.InsertTask(sql2, rb.InsertParams(_sec(2), [12])),
+        rb.InsertTask(sql1, rb.InsertParams(_sec(6), [3])),
+        rb.InsertTask(sql1, rb.InsertParams(_sec(9), [4]))
+    ]
