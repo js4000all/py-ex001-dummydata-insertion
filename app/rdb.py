@@ -4,7 +4,7 @@ import time as ti
 import typing as ty
 
 import pymysql
-import common as cmn
+import util as u
 
 # データベース接続情報
 DB_HOST = 'mariadb'  # MariaDBのホスト名
@@ -59,7 +59,7 @@ def execute_update(
     """
     def _f(connection):
         with connection.cursor() as cursor:
-            for params_set in cmn.chunked(params_iter, commit_interval):
+            for params_set in u.chunked(params_iter, commit_interval):
                 n = 0
                 for params in params_set:
                     _params = [time_converter(params[0]), *params[1:]]

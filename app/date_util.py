@@ -9,7 +9,7 @@ def execute_at(
         sleep: ty.Callable[[int], ty.Any] = time.sleep
         ) -> None:
     now = get_now()
-    delay: int = (t - now).total_seconds()
+    delay: int = int((t - now).total_seconds())
     if delay > 0:
         print(f'delay={delay} ({t} <- {now})')
         sleep(delay)

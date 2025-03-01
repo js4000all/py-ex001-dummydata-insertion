@@ -4,7 +4,7 @@ import random
 import sys
 import typing as ty
 
-import common as cmn
+import util as u
 import data
 import rdb
 import rdb_batch as rb
@@ -15,7 +15,7 @@ def _binary_to_signal(iterator:  ty.Iterator[ty.Optional[bool]], inverse: bool=F
         to_signal= lambda b: 0 if b else 1
     return map(lambda b: None if b is None else to_signal(b), iterator)
 
-def dummy_values(max_v: float = None, min_v: float = None) -> ty.Iterator[float]:
+def dummy_values(max_v: float, min_v: float) -> ty.Iterator[float]:
     delta = 5
     choices = [v/10 for v in range(-delta * 10, delta * 10 + 1)]
     state = data.State(current=0, choices=choices)
@@ -31,39 +31,13 @@ dummy_active_states = lambda: _binary_to_signal(_dummy_flags())
 dummy_fault_states = lambda: _binary_to_signal(_dummy_flags(), inverse=True)
 
 T=ty.TypeVar('T')
-def random_null(iterator: ty.Iterator[T]) -> ty.Iterator[T]:
+def random_null(iterator: ty.Iterator[T]) -> ty.Iterator[ty.Optional[T]]:
     while True:
         yield next(iterator) if random.random() < 0.75 else None
 
-Measurement = ty.Tuple[dt.datetime, int, float]
-def dummy_measurements(sensors: ty.Dict[int, ty.Iterator[float]]) -> ty.Iterator[Measurement]:
-    recs = rdb.execute_query("select max(measurement_time) as last_time from measurements")
-    base_time = recs[0]['last_time']
-    if base_time is None:
-        base_time = dt.datetime.now() - dt.timedelta(hours=1)
 
-    times: ty.Iterator[dt.datetime] = data.generate_times(base_time, min_seconds=0, max_seconds=3)
-    for sensor_id, v in cmn.merged_sequences(sensors, max_reads=1000):
-        time: dt.datetime = next(times)
-        yield (time, sensor_id, v)
-
-def insert_m2():
-    target_table = 'm3'
-    times = lambda base_time: data.generate_times(base_time, min_seconds=1, max_seconds=3)
-    sql_cols = ['measurement_time'] + \
-        [f'flag{i+1}' for i in range(10)] + \
-        [f'data{i+1}' for i in range(20)]
-    params_iters = \
-        [dummy_active_states() for _ in range(5)] + \
-        [dummy_fault_states() for _ in range(5)] + \
-        [random_null(dummy_values(min_v=0, max_v=40)) for _ in range(5)] + \
-        [random_null(dummy_values(min_v=50, max_v=100)) for _ in range(5)] + \
-        [random_null(dummy_values(min_v=0, max_v=7)) for _ in range(2)] + \
-        [random_null(dummy_values(min_v=0)) for _ in range(8)]
-    _insert_recs(target_table, sql_cols, times, params_iters, 10000)
-
-def insert_mer():
-    times = lambda base_time: data.generate_times(base_time, min_seconds=1, max_seconds=3)
+def create_mer_recs() -> rb.InsertBatch:
+    gen_times = lambda base_time: data.generate_times(base_time, min_seconds=1, max_seconds=3)
     sql_cols = ['unixtime'] + \
         [f'data{i+1:02d}' for i in range(56)]
     params_iters = \
@@ -73,16 +47,16 @@ def insert_mer():
         [dummy_fault_states() for _ in range(2)] + \
         list(it.chain(*[[dummy_active_states(), dummy_fault_states()] for _ in range(9)])) + \
         [dummy_fault_states() for _ in range(2)]
-    _insert_recs('_mer', sql_cols, times, params_iters, 100000)
+    return _create_recs('_mer', sql_cols, gen_times, params_iters)
 
-def insert_mio():
-    times = lambda base_time: data.generate_times(base_time, min_seconds=3, max_seconds=3)
+def create_mio_recs() -> rb.InsertBatch:
+    gen_times = lambda base_time: data.generate_times(base_time, min_seconds=3, max_seconds=3)
     sql_cols = ['unixtime'] + \
         [f'data{i+33:02d}' for i in range(50)]
     params_iters = \
         [random_null(dummy_values(min_v=0, max_v=100)) for _ in range(50)]
         # [data.sine_wave(a=0, b=100, period=100 + (i % 5)) for i in range(50)]
-    _insert_recs('_mio', sql_cols, times, params_iters, 100000)
+    return _create_recs('_mio', sql_cols, gen_times, params_iters)
 
 def insert_mer2():
     now = dt.datetime.now()
@@ -97,64 +71,31 @@ def insert_mer2():
             [resolved_time, 1]
         ], time_converter=lambda x: x.timestamp())
 
-def _insert_recs(
+def _create_recs(
         target_table: str, 
-        sql_cols: ty.List[str], 
-        times: ty.Callable[[dt.datetime], ty.Iterator[dt.datetime]],
-        params_iters: ty.List[ty.Iterator[ty.Any]], 
-        steps: int) -> None:
+        sql_cols: list[str], 
+        gen_times: ty.Callable[[dt.datetime], ty.Iterator[dt.datetime]],
+        params_iters: list[ty.Iterator[ty.Any]]
+        ) -> rb.InsertBatch:
     base_time = rdb.execute_query(f"select FROM_UNIXTIME(max({sql_cols[0]})) as last_time from {target_table}")[0]['last_time']
     if base_time is None:
         base_time = dt.datetime.now() - dt.timedelta(days=2)
+    times = gen_times(base_time)
 
     sql_params = ['%s' for _ in range(len(sql_cols))]
     sql = f"INSERT INTO {target_table}({', '.join(sql_cols)}) VALUES({', '.join(sql_params)})"
+    return rb.create_insert_batch(sql, times, iter(params_iters))
 
-def insert(batches: list[rb.InsertBatch]) -> None:
+def insert(batches: list[rb.InsertBatch], steps_after: int) -> None:
+    inserter = lambda sql, params: rdb.execute_update(sql, params, time_converter=lambda x: x.timestamp())
     before, after = rb.split_and_flatten_batches(dt.datetime.now(), batches)
-    inserter = lambda sql, params: rdb.insert_timed_values(sql, params, time_converter=lambda x: x.timestamp())
-    rdb.insert_timed_values(sql, it.islice(zip(times(base_time), *params_iters), steps), time_converter=lambda x: x.timestamp())
+    for batch in before:
+        rb.apply(inserter, batch)
+    rb.apply_with_delay(inserter, after, steps_after)
 
-def insert_measurements(recs: ty.Iterator[Measurement]) -> None:
-    recs = filter(lambda rec: rec[2] is not None, recs)
-    sql = """
-        INSERT INTO measurements (measurement_time, sensor_assignment_id, measured_value)
-        VALUES (%s, %s, %s);
-        """
-    rdb.insert_timed_values(sql, recs)
-
-def insert_dummy_measurements() -> None:
-    """
-    | 1000 | tankA_temperature_inlet  |
-    | 1001 | tankA_temperature_outlet |
-    | 1010 | tankA_pH                 |
-    | 2000 | heatpump1_temperature    |
-    | 2100 | heatpump1_active         |
-    | 2110 | heatpump1_fault          |
-    | 3000 | heatpump2_temperature    |
-    | 3100 | heatpump2_active         |
-    | 3110 | heatpump2_fault          |
-    | 4100 | blower1_active           |
-    """
-    sensors: ty.Dict[int, ty.Iterator[float]] = {
-        1000: dummy_values(), 
-        1001: dummy_values(), 
-        1010: dummy_values(), 
-        2000: dummy_values(), 
-        2100: dummy_active_states(), 
-        2110: dummy_fault_states(),  
-        3000: dummy_values(), 
-        3100: dummy_active_states(), 
-        3110: dummy_fault_states(),  
-        4100: dummy_active_states(), 
-    }
-    insert_measurements(dummy_measurements(sensors))
 
 if __name__ == "__main__":
     # insert_dummy_measurements()
     # insert_m2()
-    if len(sys.argv) > 1:
-        insert_mer()
-    else:
-        insert_mio()
+    insert([create_mer_recs(), create_mio_recs()], 1000)
     # insert_mer2()

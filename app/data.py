@@ -26,8 +26,8 @@ choice_func: ChoiceFunc = lambda state, weights: random.choices(state.choices, w
 
 def generate_dynamic_sequence(
         initial_state: State,
-        max_v: float = None, 
-        min_v: float = None,
+        max_v: ty.Optional[float] = None, 
+        min_v: ty.Optional[float] = None,
         weight_func: WeightFunc = calc_proximity_weights, 
         update_state_func: UpdateStateFunc = update_state, 
         random_func: ChoiceFunc = choice_func) -> ty.Iterator[float]:
@@ -145,7 +145,6 @@ def lock_state(generator: ty.Iterator[bool], lock_count: int) -> ty.Iterator[boo
     """
     # Function implementation here
     lock_remaining = 0
-    last_state
 
     for state in generator:
         if lock_remaining > 0:
@@ -167,7 +166,7 @@ def generate_times(base_time: dt.datetime, min_seconds: int, max_seconds: int) -
     :param steps: 生成する時刻の数。
     :return: ランダムな増分を持つ時刻のイテレータ。
     """
-    current_time: datetime = base_time
+    current_time: dt.datetime = base_time
     while True:
         increment = random.randint(min_seconds, max_seconds)
         current_time += dt.timedelta(seconds=increment)

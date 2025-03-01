@@ -8,8 +8,11 @@ import date_util as du
 
 @dc.dataclass
 class InsertParams:
-    time: datetime
+    time: dt.datetime
     values: list[float]
+
+    def to_tuple(self) -> tuple:
+        return (self.time, *self.values)
 
 @dc.dataclass
 class InsertBatch:
@@ -23,14 +26,19 @@ class InsertTask:
 
 
 def apply(inserter: ty.Callable[[str, ty.Iterator[tuple]], ty.Any], insert_batch: InsertBatch) -> None:
-    inserter(self.sql, ((p.time, *p.values) for p in insert_batch.params_iter))
+    inserter(insert_batch.sql, ((p.time, *p.values) for p in insert_batch.params_iter))
 
 def apply_with_delay(
         inserter: ty.Callable[[str, ty.Iterator[tuple]], ty.Any],
-        insert_tasks: ty.Iterator[InsertTask]
+        insert_tasks: ty.Iterator[InsertTask],
+        steps: int
         ) -> None:
-    for insert_task in insert_tasks:
-        du.execute_at(insert_task.time, lambda: inserter(insert_task.sql, [(insert_task.time, *insert_task.values)]))
+    for _ in range(steps):
+        insert_task = next(insert_tasks, None)
+        if insert_task is None:
+            break
+        params: InsertParams = insert_task.params
+        du.execute_at(params.time, lambda: inserter(insert_task.sql, iter([params.to_tuple()])))
 
 
 def split_insert_batch(split_time: dt.datetime, insert_batch: InsertBatch) -> tuple[InsertBatch, InsertBatch]:
@@ -68,8 +76,8 @@ def flatten_insert_batches(batches: list[InsertBatch]) -> ty.Iterator[InsertTask
 
 
 def split_and_flatten_batches(
-        split_time: datetime, batches: list[InsertBatch]
-    ) -> tuple[list[InsertBatch], Iterator[InsertTask]]:
+        split_time: dt.datetime, batches: list[InsertBatch]
+    ) -> tuple[list[InsertBatch], ty.Iterator[InsertTask]]:
     """
     各InsertBatchをsplit_timeで分割し、前半と後半に分ける。
 
@@ -92,3 +100,34 @@ def split_and_flatten_batches(
     flattened_after_tasks = flatten_insert_batches(after_batches)
 
     return before_batches, flattened_after_tasks
+
+def create_insert_batch(
+        sql: str, 
+        times: ty.Iterator[dt.datetime],
+        params_iters: ty.Iterator[ty.Iterator[ty.Any]]
+        ) -> InsertBatch:
+    """
+    指定された条件でInsertBatchを生成する。
+    
+    :param sql: SQL文
+    :param times: 時刻のイテレータ
+    :param params_iters: パラメータのイテレータのリスト
+    :return: InsertBatch
+    """
+    return InsertBatch(sql, create_insert_params(times, params_iters))
+
+def create_insert_params(
+        times: ty.Iterator[dt.datetime],
+        params_iters: ty.Iterator[ty.Iterator[ty.Any]]
+        ) -> ty.Iterator[InsertParams]:
+    """
+    指定された条件でInsertParamsを生成するジェネレータを生成する。
+    
+    :param sql: SQL文
+    :param times: 時刻のイテレータ
+    :param params_iters: パラメータのイテレータのリスト
+    :param steps: ステップ数
+    :return: InsertParamsのイテレータ
+    """
+    while True:
+        yield InsertParams(next(times), [iter(next(p_iter)) for p_iter in params_iters])
