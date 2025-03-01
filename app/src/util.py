@@ -3,7 +3,7 @@ import typing as ty
 
 T=ty.TypeVar('T')
 
-def chunked(iterable: ty.Iterable[T], n: int) -> ty.Iterator[ty.Iterator[T]]:
+def chunked(iterable: ty.Iterable[T], n: int) -> ty.Iterator[ty.Sequence[T]]:
     """
     Splits an iterable into chunks of a specified size.
     :param iterable: The iterable to be split into chunks.
@@ -14,7 +14,7 @@ def chunked(iterable: ty.Iterable[T], n: int) -> ty.Iterator[ty.Iterator[T]]:
     :rtype: Iterator[Iterator[T]]
     """
     iterator = iter(iterable)
-    return iter(lambda: iter(list(it.islice(iterator, n))), [])
+    return iter(lambda: list(it.islice(iterator, n)), [])
 
 
 def merged_sequences(sequences: ty.Dict[T, ty.Iterator[ty.Any]], max_reads: int) -> ty.Iterator[ty.Tuple[T, ty.Any]]:
