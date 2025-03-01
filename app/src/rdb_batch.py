@@ -50,7 +50,14 @@ def split_insert_batch(split_time: dt.datetime, insert_batch: InsertBatch) -> tu
     :return: (前半のInsertBatch, 後半のInsertBatch)
     """
     iter1, iter2 = it.tee(insert_batch.params_iter, 2)
-    before_params = (p for p in iter1 if p.time < split_time)
+
+    def _before_params(iterator: ty.Iterator[InsertParams], split_time: dt.datetime) -> ty.Iterator[InsertParams]:
+        for p in iterator:
+            if p.time >= split_time:
+                break
+            yield p
+
+    before_params = _before_params(iter1, split_time)
     after_params = (p for p in iter2 if p.time >= split_time)
 
     return (

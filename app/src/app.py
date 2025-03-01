@@ -91,11 +91,12 @@ def insert(batches: list[rb.InsertBatch], steps_after: int) -> None:
     before, after = rb.split_and_flatten_batches(dt.datetime.now(), batches)
     for batch in before:
         rb.apply(inserter, batch)
+    print('Inserted past records. Next, insert future records.')
     rb.apply_with_delay(inserter, after, steps_after)
 
 
 if __name__ == "__main__":
     # insert_dummy_measurements()
     # insert_m2()
-    insert([create_mer_recs(), create_mio_recs()], 1000)
+    insert([create_mer_recs(), create_mio_recs()], 10)
     # insert_mer2()

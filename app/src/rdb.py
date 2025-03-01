@@ -65,6 +65,7 @@ def execute_update(
                     _params = [time_converter(params[0]), *params[1:]]
                     cursor.execute(update_query, _params)
                     n += cursor.rowcount
+                assert n > 0, 'No records were updated.'
                 connection.commit()
                 print(f'{dt.datetime.now()}: {n} of records was inserted.')
 
